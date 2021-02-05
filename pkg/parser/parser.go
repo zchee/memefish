@@ -1937,6 +1937,7 @@ func (p *Parser) parseCreateTable(pos token.Pos) *ast.CreateTable {
 	p.expect("(")
 	var columns []*ast.ColumnDef
 	var foreignKeys []*ast.ForeignKey
+	var generatedColumn []interface{} // *ast.GeneratedColumn
 	for p.Token.Kind != token.TokenEOF {
 		if p.Token.Kind == ")" {
 			break
@@ -1946,6 +1947,8 @@ func (p *Parser) parseCreateTable(pos token.Pos) *ast.CreateTable {
 			foreignKeys = append(foreignKeys, p.parseConstraint())
 		case p.Token.IsKeywordLike("FOREIGN"):
 			foreignKeys = append(foreignKeys, p.parseForeignKey())
+		case p.Token.IsKeywordLike("AS"):
+			generatedColumn = append(generatedColumn, p.parseGeneratedColumn())
 		default:
 			columns = append(columns, p.parseColumnDef())
 		}
@@ -2043,6 +2046,15 @@ func (p *Parser) parseForeignKey() *ast.ForeignKey {
 	}
 }
 
+func (p *Parser) parseGeneratedColumn() *ast.ForeignKey /* *ast.GeneratedColumn */ {
+	pos := p.expectKeywordLike("AS").Pos
+	_ = pos
+
+	// handle GeneratedColumn
+
+	return nil // &ast.GeneratedColumn{}
+}
+
 func (p *Parser) parseTypeNotNull() (t ast.SchemaType, notNull bool, null token.Pos) {
 	t = p.parseSchemaType()
 
@@ -2056,7 +2068,7 @@ func (p *Parser) parseTypeNotNull() (t ast.SchemaType, notNull bool, null token.
 }
 
 func (p *Parser) tryParseGeneratedColumnExpr() {
-	if p.Token.Kind != "AS"  {
+	if p.Token.Kind != "AS" {
 		return
 	}
 	p.expect("AS")
