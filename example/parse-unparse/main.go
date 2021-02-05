@@ -12,14 +12,20 @@ import (
 func main() {
 	// Create a new Parser instance.
 	file := &token.File{
-		Buffer: "SELECT * FROM customers",
+		Buffer: `
+CREATE TABLE Tests (
+  Id STRING(20) NOT NULL,
+  Generated STRING(100) AS (CONCAT(Id, "XXX")) STORED OPTIONS (
+    allow_commit_timestamp = true
+  ),
+) PRIMARY KEY(Id)`,
 	}
 	p := &parser.Parser{
 		Lexer: &parser.Lexer{File: file},
 	}
 
 	// Do parsing!
-	stmt, err := p.ParseQuery()
+	stmt, err := p.ParseDDL()
 	if err != nil {
 		log.Fatal(err)
 	}

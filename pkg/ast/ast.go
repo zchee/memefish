@@ -1278,6 +1278,19 @@ type ColumnDef struct {
 	Options *ColumnDefOptions // optional
 }
 
+// GeneratedColumnExpr is generated column expression.
+//
+//     AS ({{.Expr | sql}}) STORED
+type GeneratedColumnExpr struct {
+	// pos = As
+	// end = Rparen + 1
+
+	As token.Pos // position of "AS"
+	Stored token.Pos // position of "STORED"
+
+	Expr Expr
+}
+
 // ColumnDefOption is options for column definition.
 //
 //     OPTIONS(allow_commit_timestamp = {{if .AllowCommitTimestamp}}true{{else}null{{end}}})

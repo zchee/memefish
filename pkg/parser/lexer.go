@@ -2,6 +2,7 @@ package parser
 
 import (
 	"fmt"
+	"log"
 	"strconv"
 	"unicode"
 	"unicode/utf8"
@@ -207,6 +208,7 @@ func (l *Lexer) consumeToken() {
 		s := l.slice(0, i)
 		l.skipN(i)
 		k := token.TokenKind(char.ToUpper(s))
+		log.Printf("try ident: %+v", k)
 		if _, ok := token.KeywordsMap[k]; ok {
 			l.Token.Kind = k
 		} else {

@@ -2,6 +2,7 @@ package parser
 
 import (
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/MakeNowJust/memefish/pkg/ast"
@@ -1953,8 +1954,9 @@ func (p *Parser) parseCreateTable(pos token.Pos) *ast.CreateTable {
 		}
 		p.nextToken()
 	}
+	log.Println("expect )")
 	p.expect(")")
-
+	log.Println("ok")
 	p.expectKeywordLike("PRIMARY")
 	p.expectKeywordLike("KEY")
 
@@ -1987,7 +1989,9 @@ func (p *Parser) parseCreateTable(pos token.Pos) *ast.CreateTable {
 
 func (p *Parser) parseColumnDef() *ast.ColumnDef {
 	name := p.parseIdent()
+	log.Printf("%+v", name)
 	t, notNull, null := p.parseTypeNotNull()
+	p.tryParseGeneratedColumnExpr()
 	options := p.tryParseColumnDefOptions()
 
 	return &ast.ColumnDef{
@@ -2049,6 +2053,18 @@ func (p *Parser) parseTypeNotNull() (t ast.SchemaType, notNull bool, null token.
 		notNull = true
 	}
 	return
+}
+
+func (p *Parser) tryParseGeneratedColumnExpr() {
+	if p.Token.Kind != "AS"  {
+		return
+	}
+	p.expect("AS")
+	p.expect("(")
+	expr := p.parseExpr()
+	log.Printf("%+v", expr)
+	p.expect(")")
+	p.expectKeywordLike("STORED")
 }
 
 func (p *Parser) tryParseColumnDefOptions() *ast.ColumnDefOptions {
